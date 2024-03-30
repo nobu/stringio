@@ -10,17 +10,20 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - name: Create a release
+      - name: Make a release note
+        id: note
         run: |
-          ruby \
-            -e 'print("## stringio "); \
-                puts(ARGF.read.split(/^## /)[1])' \
-            NEWS.md > release-note.md
-          title="$(head -n1 release-note.md | sed -e 's/^## //')"
-          tail -n +2 release-note.md > release-note-without-version.md
-          gh release create ${GITHUB_REF_NAME} \
-            --discussion-category Announcements \
-            --notes-file release-note-without-version.md \
-            --title "${title}"
+          #!ruby
+          note = File.read("NEWS.md")[/^## (.*)\n++\K(?m:.*?)(?=\n## |\z)/]
+          version = $1
+          File.write("release-note.md", note)
+          File.write(ENV['GITHUB_OUTPUT'], "title=stringio #{version}", mode: "a")
+        shell: ruby {0}
+      - name: Create a release
+        run: >-
+          gh release create ${GITHUB_REF_NAME}
+          --discussion-category Announcements
+          --notes-file release-note-without-version.md
+          --title "${{ github.steps.note.outputs.title }}"
         env:
           GH_TOKEN: ${{ github.token }}
