@@ -1213,14 +1213,17 @@ public class StringIO extends RubyObject implements EncodingCapable, DataType {
                 }
             case 2:
                 len = RubyNumeric.fix2int(arg0);
-                offset = RubyNumeric.fix2int(arg1);
                 if (!arg0.isNil()) {
-                    len = RubyNumeric.fix2int(arg0);
-
                     if (len < 0) {
                         throw runtime.newArgumentError("negative length " + len + " given");
                     }
                 }
+
+                offset = RubyNumeric.fix2int(arg1);
+                if (offset < 0) {
+                    throw runtime.newErrnoEINVALError("pread: Invalid offset argument");
+                }
+
                 break;
             default:
                 throw runtime.newArgumentError(argc, 0, 2);
@@ -1233,10 +1236,6 @@ public class StringIO extends RubyObject implements EncodingCapable, DataType {
                     return RubyString.newEmptyString(runtime);
                 }
                 return (RubyString) str;
-            }
-
-            if (offset < 0) {
-                throw runtime.newErrnoEINVALError("pread: Invalid offset argument");
             }
 
             if (isOutside(offset)) {
