@@ -1110,11 +1110,7 @@ public class StringIO extends RubyObject implements EncodingCapable, DataType {
             final RubyString string;
             switch (argc) {
                 case 2:
-                    str = arg1;
-                    if (!str.isNil()) {
-                        str = str.convertToString();
-                        modifyString((RubyString) str);
-                    }
+                    str = readBuf(arg1);
                 case 1:
                     if (!arg0.isNil()) {
                         len = RubyNumeric.fix2int(arg0);
@@ -1206,11 +1202,7 @@ public class StringIO extends RubyObject implements EncodingCapable, DataType {
 
         switch (argc) {
             case 3:
-                str = arg2;
-                if (!str.isNil()) {
-                    str = str.convertToString();
-                    modifyString((RubyString) str);
-                }
+                str = readBuf(arg2);
             case 2:
                 len = RubyNumeric.fix2int(arg0);
                 if (!arg0.isNil()) {
@@ -1698,6 +1690,14 @@ public class StringIO extends RubyObject implements EncodingCapable, DataType {
             str = (IRubyObject) SUBSTR_ENC.invokeExact(ch, runtime, 0, 1);
         } catch (Throwable t) {
             Helpers.throwException(t);
+        }
+        return str;
+    }
+
+    private static IRubyObject readBuf(IRubyObject str) {
+        if (!str.isNil()) {
+            str = str.convertToString();
+            modifyString((RubyString) str);
         }
         return str;
     }
