@@ -1110,7 +1110,7 @@ public class StringIO extends RubyObject implements EncodingCapable, DataType {
             final RubyString string;
             switch (argc) {
                 case 2:
-                    str = readBuf(arg1);
+                    str = readBuf(context, ptr, arg1);
                 case 1:
                     if (!arg0.isNil()) {
                         len = RubyNumeric.fix2int(arg0);
@@ -1202,7 +1202,7 @@ public class StringIO extends RubyObject implements EncodingCapable, DataType {
 
         switch (argc) {
             case 3:
-                str = readBuf(arg2);
+                str = readBuf(context, ptr, arg2);
             case 2:
                 len = RubyNumeric.fix2int(arg0);
                 if (!arg0.isNil()) {
@@ -1694,12 +1694,16 @@ public class StringIO extends RubyObject implements EncodingCapable, DataType {
         return str;
     }
 
-    private static IRubyObject readBuf(IRubyObject str) {
-        if (!str.isNil()) {
-            str = str.convertToString();
-            modifyString((RubyString) str);
+    private static IRubyObject readBuf(ThreadContext context, StringIOData ptr, IRubyObject arg) {
+        if (!arg.isNil()) {
+            arg = arg.convertToString();
+            RubyString str = (RubyString) arg;
+            modifyString(str);
+            if (str == ptr.string) {
+                throw context.runtime.newArgumentError("cannot read into the underlying string");
+            }
         }
-        return str;
+        return arg;
     }
 
     // MRI: strio_write
