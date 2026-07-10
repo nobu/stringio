@@ -959,7 +959,8 @@ public class StringIO extends RubyObject implements EncodingCapable, DataType {
                         p = rsByteList.getBegin();
                         bm_init_skip(skip, rsBytes, p, n);
                         if ((pos2 = bm_search(rsBytes, p, n, stringBytes, s, e - s, skip)) >= 0) {
-                            e = s + pos2 + (chomp ? 0 : n);
+                            e = s + pos2 + n;
+                            if (chomp) w = n;
                         }
                     }
                 }
